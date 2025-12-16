@@ -40,7 +40,8 @@ function calculateBonusByProfit(index, total, seller) {
 function analyzeSalesData(data, options) {
   // @TODO: Проверка входных
 
-  if (!data || !Array.isArray(data.sellers) || data.sellers.length == 0) {
+  if (!data || !Array.isArray(data.sellers) || data.sellers.length == 0 ||
+    !Array.isArray(data.purchase_records) || data.purchase_records.length == 0) {
     throw new Error("Некорректные входные данные");
   }
 
@@ -108,7 +109,7 @@ function analyzeSalesData(data, options) {
       if (!seller.products_sold[item.sku]) {
         seller.products_sold[item.sku] = 0;
       }
-      seller.products_sold[item.sku] += 1;
+      seller.products_sold[item.sku] += item.quantity;
     });
   });
 
@@ -125,12 +126,11 @@ function analyzeSalesData(data, options) {
       sellerStat
     );
 
-    sellerStats.top_products = Object.entries(sellerStat.products_sold).map(
-      ([sku, quantity]) => ({
+    sellerStat.top_products = Object.entries(sellerStat.products_sold)
+      .map(([sku, quantity]) => ({
         sku,
         quantity,
-      })
-    )
+      }))
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 10);
   });
@@ -144,5 +144,5 @@ function analyzeSalesData(data, options) {
     sales_count: seller.sales_count,
     top_products: seller.top_products,
     bonus: +seller.bonus.toFixed(2),
-  }))
+  }));
 }
